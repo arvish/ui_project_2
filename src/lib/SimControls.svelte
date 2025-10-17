@@ -1,75 +1,74 @@
 <script lang="ts">
-  import { plantState, resetPlant } from '$lib/plantStore';
-  import TimeWheel from './TimeWheel.svelte';
-  import { onMount, onDestroy } from 'svelte';
+  import { plantState, resetPlant } from '$lib/plantStore'
+  import TimeWheel from './TimeWheel.svelte'
+  import WaterBucket from './WaterBucket.svelte'
+  import FertilizerBag from './FertilizerBag.svelte'
+  import { onMount, onDestroy } from 'svelte'
 
-  $: state = $plantState;
-  let time = 12; // in hours (0–24)
-  let isRunning = false;
-  let speed = 1; // multiplier
-  let simInterval: ReturnType<typeof setInterval> | null = null;
+  $: state = $plantState
 
-  // --- Update day phase ---
+  let time = 12 // 0–24 hrs
+  let running = false
+  let speed = 1
+  let interval: ReturnType<typeof setInterval> | null = null
+
   function updateLabel() {
-    const val = time;
-    const label =
-      val < 6  ? 'Night' :
-      val < 9  ? 'Dawn'  :
-      val < 18 ? 'Day'   :
-      val < 21 ? 'Dusk'  : 'Night';
+    let label = 'Day'
+    if (time < 6) label = 'Night'
+    else if (time < 9) label = 'Dawn'
+    else if (time < 18) label = 'Day'
+    else if (time < 21) label = 'Dusk'
+    else label = 'Night'
 
     plantState.update(s => ({
       ...s,
       dayTime: label,
-      // Simulate environment drift
       moisture: Math.max(s.moisture - 0.002 * speed, 0),
       nutrients: Math.max(s.nutrients - 0.001 * speed, 0),
-      sunlight: (val >= 6 && val <= 18)
+      sunlight: time >= 6 && time <= 18
         ? Math.min(s.sunlight + 0.001 * speed, 1)
         : Math.max(s.sunlight - 0.0015 * speed, 0)
-    }));
+    }))
   }
 
-  // --- Manual time change via wheel ---
   function handleTimeChange(e: CustomEvent) {
-    time = e.detail.time;
-    updateLabel();
+    time = e.detail.time
+    updateLabel()
   }
 
-  // --- Simulation loop ---
   function startSim() {
-    if (simInterval) return;
-    simInterval = setInterval(() => {
-      if (!isRunning) return;
-      time = (time + (5 / 60) * speed) % 24; // 5 min per second × speed
-      updateLabel();
-    }, 1000);
+    if (interval) return
+    interval = setInterval(() => {
+      if (!running) return
+      time = (time + (5 / 60) * speed) % 24 // 5 mins = 1 sec
+      updateLabel()
+    }, 1000)
   }
 
   function toggleSim() {
-    isRunning = !isRunning;
-    if (isRunning) startSim();
+    running = !running
+    if (running) startSim()
   }
 
   function incSpeed() {
-    speed = Math.min(speed + 1, 10);
+    if (speed < 10) speed += 1
   }
 
   function decSpeed() {
-    speed = Math.max(speed - 0.5, 0.5);
+    if (speed > 0.5) speed -= 0.5
   }
 
   function resetSim() {
-    time = 12;
-    speed = 1;
-    isRunning = false;
-    resetPlant(); // resets store safely
+    time = 12
+    speed = 1
+    running = false
+    resetPlant()
   }
 
-  onMount(() => startSim());
+  onMount(() => startSim())
   onDestroy(() => {
-    if (simInterval) clearInterval(simInterval);
-  });
+    if (interval) clearInterval(interval)
+  })
 </script>
 
 <style>
@@ -83,19 +82,19 @@
     align-items: center;
   }
 
-  .sim-buttons {
+  .buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: .5rem;
     margin-top: 1rem;
   }
 
   button {
-    padding: 0.4rem 0.8rem;
+    padding: .4rem .8rem;
     border: none;
-    border-radius: 0.4rem;
+    border-radius: .4rem;
     background: #007aff;
     color: white;
-    font-size: 0.9rem;
+    font-size: .9rem;
     cursor: pointer;
   }
 
@@ -104,23 +103,23 @@
   }
 
   .label {
-    font-size: 1.1rem;
     margin-top: 1rem;
   }
 
   .speed {
-    font-size: 0.9rem;
-    margin-top: 0.4rem;
+    font-size: .9rem;
     color: #555;
+    margin-top: .4rem;
   }
 </style>
 
 <div class="controls">
   <h2>Simulation</h2>
+
   <TimeWheel {time} on:timechange={handleTimeChange} />
 
-  <div class="sim-buttons">
-    <button on:click={toggleSim}>{isRunning ? '⏸ Pause' : '▶️ Run'}</button>
+  <div class="buttons">
+    <button on:click={toggleSim}>{running ? '⏸ Pause' : '▶️ Run'}</button>
     <button on:click={decSpeed}>– Speed</button>
     <button on:click={incSpeed}>+ Speed</button>
     <button on:click={resetSim}>🔄 Reset</button>
@@ -128,4 +127,7 @@
 
   <div class="label">{time.toFixed(2)}h — {state.dayTime}</div>
   <div class="speed">Speed: {speed}×</div>
+
+  <WaterBucket />
+  <FertilizerBag />
 </div>
