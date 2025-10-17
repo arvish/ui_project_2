@@ -10,8 +10,12 @@ const defaultPlant = {
   dayTime: 'Morning'
 };
 
-export const plantState = writable(defaultPlant);
+export const plantState = writable({ ...defaultPlant });
 
 export function updatePlant(updates: Partial<typeof defaultPlant>) {
   plantState.update(s => ({ ...s, ...updates }));
+}
+
+export function resetPlant() {
+  plantState.set({ ...defaultPlant });
 }
