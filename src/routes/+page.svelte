@@ -18,12 +18,13 @@
     padding: 1rem;
     background: rgba(238, 245, 238, 0.7); 
     backdrop-filter: blur(2px);            
-    display: flex;
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     transition: background 0.3s;
     border-radius: 12px;
+    pointer-events: none;
   }
   .pot {
     width: 150px;

@@ -73,6 +73,8 @@
 
 <style>
   .controls {
+    position: relative;       /* create its own stacking context */
+    z-index: 2;
     background: #f7f7f7;
     border-left: 2px solid #ccc;
     height: 100%;
