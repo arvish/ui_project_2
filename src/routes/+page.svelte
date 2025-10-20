@@ -1,6 +1,7 @@
 <script lang="ts">
   import { plantState } from '$lib/plantStore';
   import SimControls from '$lib/SimControls.svelte';
+  import Pot from '$lib/Pot.svelte';
   $: state = $plantState;
   $: potColor = `hsl(${120 * state.moisture}, 40%, ${60 + state.sunlight * 20}%)`;
   $: plantScale = 0.5 + state.nutrients * 0.5;
@@ -10,16 +11,19 @@
   .container {
     display: flex;
     height: 100vh;
+    z-index: 1;
   }
   .left {
     flex: 1;
     padding: 1rem;
-    background: #eef5ee;
+    background: rgba(238, 245, 238, 0.7); 
+    backdrop-filter: blur(2px);            
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     transition: background 0.3s;
+    border-radius: 12px;
   }
   .pot {
     width: 150px;
@@ -38,8 +42,10 @@
 </style>
 
 <div class="container">
+  <Pot />
   <div class="left">
     <h2>🌱 Smart Plant Pot</h2>
+    
     <div class="pot" style="--pot-color: {potColor}">
       <div class="plant" style="transform: scale({plantScale})">🌿</div>
     </div>
@@ -52,4 +58,5 @@
   </div>
 
   <SimControls />
+
 </div>
